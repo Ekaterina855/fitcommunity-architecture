@@ -43,12 +43,12 @@
 
 | Диаграмма | Описание |
 |-----------|----------|
-| ![Контекстная диаграмма](diagrams/context.png) | **Контекстная (C4)** – взаимодействие системы с внешним миром |
-| ![Логическая архитектура](diagrams/containers.png) | **Контейнеры (C4)** – логическая структура системы |
-| ![Компоненты монолита](diagrams/components.png) | **Внутренние компоненты монолита** (слои: UI, Application, Domain, Data) |
-| ![Статусы тренировки](diagrams/state-training.png) | **Статусная модель тренировки** |
-| ![Статусы подписки](diagrams/state-subscription.png) | **Статусная модель подписки** |
-| ![Роли RBAC](diagrams/roles.png) | **Диаграмма ролей** (USER, TRAINER, ADMIN) |
+| [Контекстная диаграмма](diagrams/diagrams/Контекстная диаграмма (C4 Context Level).svg) | Контекстная (C4) – взаимодействие системы с внешним миром |
+| [Логическая архитектура](diagrams/diagrams/Логическая архитектура (уровень контейнеров C4).svg) | Контейнеры (C4) – логическая структура системы |
+| [Компоненты монолита](diagrams/diagrams/Диаграмма компонентов монолита.svg) | Внутренние компоненты монолита (слои: UI, Application, Domain, Data) |
+| [Статусы тренировки](diagrams/diagrams/Статусная модель Тренировка.svg) | Статусная модель тренировки |
+| [Статусы подписки](diagrams/diagrams/Статусная модель Подписка.svg) | Статусная модель подписки |
+| [Роли RBAC](diagrams/diagrams/Диаграмма ролей (RBAC).svg) | Диаграмма ролей (USER, TRAINER, ADMIN) |
 
 > 📸 Полный набор диаграмм доступен [здесь](diagrams/).
 
@@ -57,7 +57,7 @@
 ## 📄 API Контракты (OpenAPI 3.0)
 
 Интерактивная документация доступна по ссылке:  
-👉 **[Swagger UI (docs/index.html)](https:/Ekaterina855.github.io/fitcommunity-architecture/docs/index.html)**
+👉 **[Swagger UI (docs/index.html)](https://ekaterina855.github.io/fitcommunity-architecture/#/)**
 
 ### Спецификации монолита
 | Файл | Описание |
@@ -168,7 +168,7 @@
 
 ## 🔗 Ссылки
 
-- [Интерактивная документация API (Swagger UI)](https://Ekaterina855.github.io/fitcommunity-architecture/docs/index.html)
+- [Интерактивная документация API (Swagger UI)](https://ekaterina855.github.io/fitcommunity-architecture/#/)
 - [Репозиторий на GitHub](https://github.com/Ekaterina855/fitcommunity-architecture)
 - [Postman коллекция](postman/FitCommunity_Monolith_API.json)
 

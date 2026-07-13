@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FitCommunity API Documentation</title>
-  <!-- Подключаем Swagger UI CSS и JS -->
   <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
   <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
@@ -30,10 +29,9 @@
   <div id="swagger-ui" class="swagger-container"></div>
 
   <script>
-    // Функция загрузки спецификации
     function loadSpec(file) {
       const ui = SwaggerUIBundle({
-        url: `../openapi/${file}`,  // путь относительно docs/
+        url: `/fitcommunity-architecture/openapi/${file}`,  // изменён путь
         dom_id: '#swagger-ui',
         presets: [
           SwaggerUIBundle.presets.apis,
@@ -45,7 +43,6 @@
       window.ui = ui;
     }
 
-    // Загружаем при загрузке страницы
     window.onload = function() {
       loadSpec('openapi-prod.yaml');
     };

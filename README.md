@@ -1,0 +1,1 @@
+# fitcommunity-architecture

@@ -1,0 +1,125 @@
+openapi: 3.0.0
+info:
+  title: Recommendation Service API
+  description: AI-рекомендации тренировок и питания.
+  version: 1.0.0
+servers:
+  - url: http://recommendation-service:8080
+tags:
+  - name: recommendation
+  - name: feedback
+  - name: admin
+paths:
+  /trainings/recommend:
+    get:
+      tags: [recommendation]
+      security: [ { bearerAuth: [] } ]
+      summary: Получить персонализированную рекомендацию тренировки
+      operationId: recommendTraining
+      responses:
+        '200':
+          description: Рекомендованная программа
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingProgram'
+        '401':
+          description: Не авторизован
+  /trainings/recommend/batch:
+    get:
+      tags: [recommendation]
+      security: [ { bearerAuth: [] } ]
+      summary: Получить несколько рекомендаций (например, на неделю)
+      operationId: recommendTrainingsBatch
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 5 }
+      responses:
+        '200':
+          description: Массив программ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrainingProgram'
+        '401':
+          description: Не авторизован
+  /recipes/recommend:
+    get:
+      tags: [recommendation]
+      security: [ { bearerAuth: [] } ]
+      summary: Рекомендации блюд (на основе целей пользователя)
+      operationId: recommendRecipes
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 3 }
+      responses:
+        '200':
+          description: Массив рецептов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Recipe'
+        '401':
+          description: Не авторизован
+  /trainings/feedback:
+    post:
+      tags: [feedback]
+      security: [ { bearerAuth: [] } ]
+      summary: Отправить обратную связь о рекомендации (для ML)
+      operationId: submitTrainingFeedback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [recommendation_id, rating]
+              properties:
+                recommendation_id: { type: string, format: uuid }
+                rating: { type: integer, minimum: 1, maximum: 5 }
+      responses:
+        '200':
+          description: Фикбек записан
+        '400':
+          description: Некорректные данные
+  /refresh:
+    post:
+      tags: [admin]
+      security: [ { bearerAuth: [] } ]
+      summary: Принудительно пересчитать рекомендации для всех пользователей (только ADMIN)
+      operationId: refreshRecommendations
+      responses:
+        '202':
+          description: Задача запущена асинхронно
+        '403':
+          description: Недостаточно прав (требуется роль ADMIN)
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    TrainingProgram:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        duration_minutes: { type: integer }
+        difficulty: { type: string, enum: [beginner, intermediate, advanced] }
+        description: { type: string }
+    Recipe:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        calories: { type: integer }
+        protein: { type: integer }
+        carbs: { type: integer }
+        fat: { type: integer }

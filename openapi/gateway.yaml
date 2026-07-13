@@ -1,0 +1,236 @@
+openapi: 3.0.0
+info:
+  title: FitCommunity API Gateway
+  description: |
+    Единая точка входа для клиентов (мобильные приложения, SPA).
+    - Аутентификация через JWT (Bearer).
+    - Маршрутизация запросов к соответствующим микросервисам.
+    - Rate limiting (100 запросов/мин на пользователя).
+    - Агрегация данных НЕ выполняется (клиент сам комбинирует ответы).
+  version: 1.0.0
+servers:
+  - url: https://api.fitcommunity.com/v1
+    description: Production gateway
+  - url: https://dev-api.fitcommunity.com/v1
+    description: Development gateway
+tags:
+  - name: User
+  - name: Training
+  - name: Social
+  - name: Billing
+  - name: Recommendation
+paths:
+  /users/register:
+    post:
+      tags: [User]
+      summary: Регистрация – прокси в User Service
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                password: { type: string }
+                name: { type: string }
+      responses:
+        '201': { description: User created }
+        '400': { description: Bad request }
+        '409': { description: Email already exists }
+  /users/login:
+    post:
+      tags: [User]
+      summary: Логин – прокси в User Service
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email: { type: string }
+                password: { type: string }
+      responses:
+        '200':
+          description: Возвращает JWT
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+        '401': { description: Invalid credentials }
+  /users/me:
+    get:
+      tags: [User]
+      summary: Получить профиль
+      security: [ { bearerAuth: [] } ]
+      operationId: getMyProfile
+      responses:
+        '200': { description: Профиль пользователя }
+        '401': { description: Unauthorized }
+    patch:
+      tags: [User]
+      summary: Обновить профиль
+      security: [ { bearerAuth: [] } ]
+      operationId: updateMyProfile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                weight: { type: number }
+                goal: { type: string }
+      responses:
+        '200': { description: Updated }
+  /trainings:
+    post:
+      tags: [Training]
+      summary: Создать тренировку
+      security: [ { bearerAuth: [] } ]
+      operationId: createTraining
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type: { type: string, enum: [run, gym, yoga] }
+                duration: { type: integer }
+                distance: { type: number }
+      responses:
+        '201': { description: Training created }
+    get:
+      tags: [Training]
+      summary: История тренировок
+      security: [ { bearerAuth: [] } ]
+      operationId: getTrainings
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 10 }
+      responses:
+        '200': { description: Array of trainings }
+  /trainings/{id}:
+    get:
+      tags: [Training]
+      summary: Детали тренировки
+      security: [ { bearerAuth: [] } ]
+      operationId: getTraining
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200': { description: Training details }
+        '404': { description: Not found }
+    delete:
+      tags: [Training]
+      summary: Удалить тренировку
+      security: [ { bearerAuth: [] } ]
+      operationId: deleteTraining
+      parameters:
+        - name: id
+          in: path
+          required: true
+      responses:
+        '204': { description: Deleted }
+  /trainings/sync/garmin:
+    post:
+      tags: [Training]
+      summary: Синхронизация с Garmin
+      security: [ { bearerAuth: [] } ]
+      operationId: syncGarmin
+      responses:
+        '202': { description: Sync started }
+  /posts:
+    post:
+      tags: [Social]
+      summary: Создать пост
+      security: [ { bearerAuth: [] } ]
+      operationId: createPost
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                content: { type: string }
+                training_id: { type: string, format: uuid }
+      responses:
+        '201': { description: Post created }
+    get:
+      tags: [Social]
+      summary: Лента новостей
+      security: [ { bearerAuth: [] } ]
+      operationId: getFeed
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 20 }
+      responses:
+        '200': { description: Array of posts }
+  /posts/{id}/like:
+    post:
+      tags: [Social]
+      summary: Лайк/анлайк
+      security: [ { bearerAuth: [] } ]
+      operationId: likePost
+      parameters:
+        - name: id
+          in: path
+          required: true
+      responses:
+        '200': { description: New like state }
+  /subscriptions:
+    post:
+      tags: [Billing]
+      summary: Оформить подписку
+      security: [ { bearerAuth: [] } ]
+      operationId: createSubscription
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plan: { type: string, enum: [monthly, yearly] }
+      responses:
+        '201': { description: Subscription created }
+    get:
+      tags: [Billing]
+      summary: Мои подписки
+      security: [ { bearerAuth: [] } ]
+      operationId: getMySubscriptions
+      responses:
+        '200': { description: List of subscriptions }
+  /subscriptions/me:
+    get:
+      tags: [Billing]
+      summary: Текущая активная подписка
+      security: [ { bearerAuth: [] } ]
+      operationId: getCurrentSubscription
+      responses:
+        '200': { description: Active subscription or 404 }
+  /recommendations/training:
+    get:
+      tags: [Recommendation]
+      summary: Рекомендация тренировки
+      security: [ { bearerAuth: [] } ]
+      operationId: recommendTraining
+      responses:
+        '200': { description: Recommended program }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

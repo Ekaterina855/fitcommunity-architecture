@@ -1,0 +1,181 @@
+openapi: 3.0.0
+info:
+  title: Training Service API
+  description: Управление тренировками, синхронизация с устройствами.
+  version: 1.0.0
+servers:
+  - url: http://training-service:8080
+tags:
+  - name: training
+  - name: sync
+paths:
+  /trainings:
+    post:
+      tags: [training]
+      security: [ { bearerAuth: [] } ]
+      summary: Создать тренировку вручную
+      operationId: createTraining
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, duration]
+              properties:
+                type: { type: string, enum: [run, gym, yoga] }
+                duration: { type: integer, minimum: 1, example: 3600 }
+                distance: { type: number, example: 10.5 }
+                start_time: { type: string, format: date-time }
+      responses:
+        '201':
+          description: Тренировка создана
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingResponse'
+        '400':
+          description: Некорректные данные
+        '401':
+          description: Не авторизован
+    get:
+      tags: [training]
+      security: [ { bearerAuth: [] } ]
+      summary: Получить историю тренировок пользователя
+      operationId: getTrainings
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 10 }
+        - name: offset
+          in: query
+          schema: { type: integer, default: 0 }
+        - name: type
+          in: query
+          schema: { type: string, enum: [run, gym, yoga] }
+      responses:
+        '200':
+          description: Список тренировок
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrainingResponse'
+        '401':
+          description: Не авторизован
+  /trainings/{id}:
+    get:
+      tags: [training]
+      security: [ { bearerAuth: [] } ]
+      summary: Получить детали конкретной тренировки
+      operationId: getTrainingById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Детали тренировки
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingResponse'
+        '401':
+          description: Не авторизован
+        '403':
+          description: Доступ запрещён (не своя тренировка)
+        '404':
+          description: Тренировка не найдена
+    delete:
+      tags: [training]
+      security: [ { bearerAuth: [] } ]
+      summary: Удалить тренировку
+      operationId: deleteTraining
+      parameters:
+        - name: id
+          in: path
+          required: true
+      responses:
+        '204':
+          description: Успешно удалено
+        '401':
+          description: Не авторизован
+        '403':
+          description: Недостаточно прав (не владелец)
+        '404':
+          description: Тренировка не найдена
+  /trainings/sync/garmin:
+    post:
+      tags: [sync]
+      security: [ { bearerAuth: [] } ]
+      summary: Запустить синхронизацию с Garmin Connect
+      operationId: syncGarmin
+      headers:
+        Idempotency-Key:
+          schema: { type: string, format: uuid }
+          required: true
+      responses:
+        '202':
+          description: Синхронизация запущена асинхронно
+        '401':
+          description: Не авторизован
+        '409':
+          description: Синхронизация уже выполняется
+  /trainings/history:
+    get:
+      tags: [training, internal]
+      security: [ { internalAuth: [] } ]
+      summary: Получить историю тренировок для внутреннего вызова
+      operationId: getTrainingHistoryInternal
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          schema: { type: string, format: uuid }
+        - name: limit
+          in: query
+          schema: { type: integer, default: 100 }
+      responses:
+        '200':
+          description: Список тренировок
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrainingSummary'
+        '401':
+          description: Не авторизован (невалидный internal token)
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    internalAuth:
+      type: apiKey
+      in: header
+      name: X-Internal-Token
+  schemas:
+    TrainingResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        type: { type: string }
+        duration: { type: integer }
+        distance: { type: number }
+        calories: { type: integer }
+        start_time: { type: string, format: date-time }
+        sync_status:
+          type: string
+          enum: [created, syncing, synced, failed]
+    TrainingSummary:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        type: { type: string }
+        duration: { type: integer }
+        calories: { type: integer }
+        start_time: { type: string, format: date-time }

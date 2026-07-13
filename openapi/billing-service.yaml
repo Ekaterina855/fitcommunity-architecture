@@ -1,0 +1,150 @@
+openapi: 3.0.0
+info:
+  title: Billing Service API
+  description: Управление подписками и платежами.
+  version: 1.0.0
+servers:
+  - url: http://billing-service:8080
+tags:
+  - name: subscription
+paths:
+  /subscriptions:
+    post:
+      tags: [subscription]
+      security: [ { bearerAuth: [] } ]
+      summary: Оформить подписку (создать платёжную сессию)
+      operationId: createSubscription
+      headers:
+        Idempotency-Key:
+          schema: { type: string, format: uuid }
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [plan]
+              properties:
+                plan: { type: string, enum: [monthly, yearly] }
+                payment_method: { type: string, default: card }
+      responses:
+        '201':
+          description: Подписка создана (ожидает оплаты)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '400':
+          description: Некорректный план
+        '401':
+          description: Не авторизован
+        '409':
+          description: Уже есть активная подписка
+    get:
+      tags: [subscription]
+      security: [ { bearerAuth: [] } ]
+      summary: Получить все подписки пользователя
+      operationId: getUserSubscriptions
+      responses:
+        '200':
+          description: Список подписок
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subscription'
+        '401':
+          description: Не авторизован
+  /subscriptions/me:
+    get:
+      tags: [subscription]
+      security: [ { bearerAuth: [] } ]
+      summary: Получить текущую активную подписку (если есть)
+      operationId: getCurrentSubscription
+      responses:
+        '200':
+          description: Активная подписка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '404':
+          description: Нет активной подписки
+        '401':
+          description: Не авторизован
+  /subscriptions/{id}:
+    get:
+      tags: [subscription]
+      security: [ { bearerAuth: [] } ]
+      summary: Детали конкретной подписки
+      operationId: getSubscriptionById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Подписка
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '404':
+          description: Не найдена
+    delete:
+      tags: [subscription]
+      security: [ { bearerAuth: [] } ]
+      summary: Отменить подписку (установить статус cancelled)
+      operationId: cancelSubscription
+      parameters:
+        - name: id
+          in: path
+          required: true
+      responses:
+        '200':
+          description: Подписка отменена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        '401':
+          description: Не авторизован
+        '403':
+          description: Нельзя отменить чужую подписку
+        '409':
+          description: Недопустимый переход (уже истекла или отменена)
+  /webhooks/cloudpayments:
+    post:
+      tags: [webhook]
+      summary: Webhook от платежного провайдера (CloudPayments)
+      operationId: paymentWebhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                transaction_id: { type: string }
+                status: { type: string }
+      responses:
+        '200':
+          description: Webhook обработан
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Subscription:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        plan: { type: string }
+        status: { type: string, enum: [pending, active, expired, cancelled] }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }

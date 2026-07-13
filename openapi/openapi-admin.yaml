@@ -1,0 +1,129 @@
+openapi: 3.0.0
+info:
+  title: FitCommunity Admin API
+  description: Административные операции. Доступ только для роли ADMIN.
+  version: 1.0.0-admin
+servers:
+  - url: https://admin.fitcommunity.com/admin/api
+    description: Admin server
+tags:
+  - name: Admin
+paths:
+  /users:
+    get:
+      tags: [Admin]
+      summary: Список всех пользователей
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50 }
+        - name: offset
+          in: query
+          schema: { type: integer, default: 0 }
+      responses:
+        '200':
+          description: Список пользователей
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total: { type: integer }
+                  users:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AdminUser'
+        '401': { description: Не авторизован }
+        '403': { description: Недостаточно прав (требуется ADMIN) }
+  /users/{id}:
+    delete:
+      tags: [Admin]
+      summary: Удалить пользователя и все связанные данные
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204': { description: Пользователь удалён }
+        '401': { description: Не авторизован }
+        '403': { description: Недостаточно прав }
+        '404': { description: Пользователь не найден }
+  /posts/{id}:
+    delete:
+      tags: [Admin]
+      summary: Удалить любой пост (модерация)
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204': { description: Пост удалён }
+        '401': { description: Не авторизован }
+        '403': { description: Недостаточно прав }
+        '404': { description: Пост не найден }
+  /stats:
+    get:
+      tags: [Admin]
+      summary: Статистика платформы
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200':
+          description: Статистические данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PlatformStats'
+        '401': { description: Не авторизован }
+        '403': { description: Недостаточно прав }
+  /logs:
+    get:
+      tags: [Admin]
+      summary: Получить логи API (за последние 24 часа)
+      security: [ { bearerAuth: [] } ]
+      parameters:
+        - name: level
+          in: query
+          schema: { type: string, enum: [info, warn, error], default: error }
+      responses:
+        '200':
+          description: Логи
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    timestamp: { type: string, format: date-time }
+                    level: { type: string }
+                    message: { type: string }
+        '403': { description: Недостаточно прав }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    AdminUser:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        email: { type: string }
+        name: { type: string }
+        role: { type: string, enum: [USER, TRAINER, ADMIN] }
+        created_at: { type: string, format: date-time }
+    PlatformStats:
+      type: object
+      properties:
+        total_users: { type: integer }
+        total_trainings: { type: integer }
+        total_posts: { type: integer }
+        active_subscriptions: { type: integer }
+        requests_per_day: { type: integer }
+security: []

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitCommunity API Documentation</title>
+  <!-- Подключаем Swagger UI CSS и JS -->
+  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+  <style>
+    body { margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    .topbar { background: #1a1a2e; padding: 15px 30px; color: white; display: flex; justify-content: space-between; align-items: center; }
+    .topbar h1 { margin: 0; font-size: 22px; }
+    .topbar a { color: #ffd700; text-decoration: none; margin-left: 20px; }
+    .swagger-container { height: calc(100vh - 80px); overflow-y: auto; }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <h1>🚀 FitCommunity API</h1>
+    <div>
+      <a href="#prod" onclick="loadSpec('openapi-prod.yaml')">Production</a>
+      <a href="#test" onclick="loadSpec('openapi-test.yaml')">Test</a>
+      <a href="#admin" onclick="loadSpec('openapi-admin.yaml')">Admin</a>
+      <a href="#ms" onclick="loadSpec('gateway.yaml')">Gateway</a>
+    </div>
+  </div>
+
+  <div id="swagger-ui" class="swagger-container"></div>
+
+  <script>
+    // Загружаем по умолчанию prod
+    function loadSpec(file) {
+      const ui = SwaggerUIBundle({
+        url: `../openapi/${file}`,  // путь относительно docs/
+        dom_id: '#swagger-ui',
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        layout: "BaseLayout",
+        deepLinking: true,
+      });
+      window.ui = ui;
+    }
+
+    // Загружаем при загрузке страницы
+    window.onload = function() {
+      loadSpec('openapi-prod.yaml');
+    };
+  </script>
+</body>
+</html>

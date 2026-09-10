@@ -59,12 +59,12 @@
 ### Контракты микросервисов
 | Сервис | Файл |
 |--------|------|
-| User Service | [`user-service.yaml`](openapi/user-service.yaml) |
-| Training Service | [`training-service.yaml`](openapi/training-service.yaml) |
-| Social Service | [`social-service.yaml`](openapi/social-service.yaml) |
-| Billing Service | [`billing-service.yaml`](openapi/billing-service.yaml) |
-| Recommendation Service | [`recommendation-service.yaml`](openapi/recommendation-service.yaml) |
-| API Gateway | [`gateway.yaml`](openapi/gateway.yaml) |
+| User Service | [`user-service.yaml`](docs/openapi/user-service.yaml) |
+| Training Service | [`training-service.yaml`](docs/openapi/training-service.yaml) |
+| Social Service | [`social-service.yaml`](docs/openapi/social-service.yaml) |
+| Billing Service | [`billing-service.yaml`](docs/openapi/billing-service.yaml) |
+| Recommendation Service | [`recommendation-service.yaml`](docs/openapi/recommendation-service.yaml) |
+| API Gateway | [`gateway.yaml`](docs/openapi/gateway.yaml) |
 
 ---
 

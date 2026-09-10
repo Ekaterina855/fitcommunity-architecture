@@ -52,9 +52,9 @@
 ### Спецификации монолита
 | Файл | Описание |
 |------|----------|
-| [`openapi-prod.yaml`](openapi/openapi-prod.yaml) | Продуктовое API (17 бизнес-операций) |
-| [`openapi-test.yaml`](openapi/openapi-test.yaml) | Тестовая среда (с отладочными ручками) |
-| [`openapi-admin.yaml`](openapi/openapi-admin.yaml) | Администрирование (роль ADMIN) |
+| [`openapi-prod.yaml`](docs/openapi/openapi-prod.yaml) | Продуктовое API (17 бизнес-операций) |
+| [`openapi-test.yaml`](docs/openapi/openapi-test.yaml) | Тестовая среда (с отладочными ручками) |
+| [`openapi-admin.yaml`](docs/openapi/openapi-admin.yaml) | Администрирование (роль ADMIN) |
 
 ### Контракты микросервисов
 | Сервис | Файл |
